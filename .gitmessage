@@ -1,0 +1,14 @@
+# <type>(<scope>): TAHUB-XXX <description>
+
+# [optional body]
+# [optional footer(s)]
+
+# Types: feat, fix, docs, style, refactor, perf, test, chore, ci, build
+# Add ! after type for breaking change (feat!: ...)
+# Or add BREAKING CHANGE: in footer
+
+# Examples:
+# feat(tasks): TAHUB-123 add task filtering component
+# fix(auth): TAHUB-456 resolve token refresh issue
+# docs: TAHUB-789 update README with setup instructions
+# BREAKING CHANGE: New UI is not backward compatible
