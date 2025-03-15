@@ -43,6 +43,20 @@ TaskHub-app uses a robust CI/CD pipeline with GitHub Actions that includes:
 
 This approach simulates an enterprise-level artifact management system with proper versioning and easy access to all builds.
 
+## Project Setup
+
+This project uses **pnpm** as the package manager and enforces a specific Node.js version using **Volta**.
+
+- **Node.js version:** `22.14.0` (managed via Volta)
+- **pnpm version:** `10.6.3`
+
+To ensure compatibility, install Volta and let it manage the correct versions automatically:
+
+```sh
+curl https://get.volta.sh | bash
+volta install node@22.14.0 pnpm@10.6.3
+```
+
 ## Available Scripts
 
 - `pnpm dev` - Start development server
