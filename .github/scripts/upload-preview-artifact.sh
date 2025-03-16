@@ -46,4 +46,4 @@ az storage blob copy start \
   --auth-mode login
 
 echo "Artifact upload complete"
-echo "::set-output name=download_url::https://${STORAGE_ACCOUNT}.blob.core.windows.net/builds/${ENV_NAME}/taskhub-latest.zip"
+echo "{download_url}={https://${STORAGE_ACCOUNT}.blob.core.windows.net/builds/${ENV_NAME}/taskhub-latest.zip}"
