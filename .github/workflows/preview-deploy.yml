@@ -1,0 +1,107 @@
+name: Preview Environment Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Preview environment to deploy to"
+        required: true
+        default: "preview1"
+        type: choice
+        options:
+          - preview1
+          - preview2
+
+jobs:
+  deploy-preview:
+    name: Deploy to Preview Environment
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install Dependencies
+        run: pnpm i
+
+      - name: Build project
+        run: pnpm build
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_ENVIRONMENT: ${{ github.event.inputs.environment }}
+          VITE_LOGGING_LEVEL: "debug"
+
+      - name: Get branch name
+        id: branch
+        run: echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
+
+      - name: Create build artifact
+        id: create_artifact
+        run: |
+          TIMESTAMP=$(date +%Y%m%d%H%M%S)
+          cd dist
+          zip -r ../taskhub-${{ github.event.inputs.environment }}-$TIMESTAMP.zip .
+          cd ..
+          echo "Build timestamp: $(date)" > build-info.txt
+          echo "Environment: ${{ github.event.inputs.environment }}" >> build-info.txt
+          echo "Commit: ${{ github.sha }}" >> build-info.txt
+          echo "Branch: ${{ steps.branch.outputs.branch }}" >> build-info.txt
+          echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
+
+      - name: Upload build artifact to GitHub
+        uses: actions/upload-artifact@v4
+        with:
+          name: taskhub-${{ github.event.inputs.environment }}
+          path: |
+            taskhub-${{ github.event.inputs.environment }}*.zip
+            build-info.txt
+          retention-days: 7
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Make script executable
+        run: chmod +x .github/scripts/upload-preview-artifact.sh
+
+      - name: Upload build to Azure Blob Storage
+        id: upload_artifact
+        run: |
+          ./.github/scripts/upload-preview-artifact.sh \
+            ${{ github.event.inputs.environment }} \
+            ${{ steps.create_artifact.outputs.timestamp }} \
+            ${{ secrets.AZURE_STORAGE_ACCOUNT_NAME }} \
+            ${{ github.sha }}
+
+      - name: Deploy to Azure Static Web Apps
+        id: deploy
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          app_location: "dist"
+          api_location: ""
+          skip_app_build: true
+          deployment_environment: ${{ github.event.inputs.environment }}
+
+      - name: Post deployment notification
+        if: success()
+        run: |
+          echo "🚀 Successfully deployed to ${{ github.event.inputs.environment }} environment"
+          echo "URL: https://wonderful-stone-059600500-${{ github.event.inputs.environment }}.eastasia.6.azurestaticapps.net"
+          echo "Build artifact: taskhub-${{ github.event.inputs.environment }}-${{ steps.create_artifact.outputs.timestamp }}.zip stored in Azure Blob Storage"
+          echo "Download link: ${{ steps.upload_artifact.outputs.download_url }}"
