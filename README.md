@@ -25,19 +25,18 @@ TaskHub-app uses a robust CI/CD pipeline with GitHub Actions that includes:
 1. **Build Artifacts Storage**
 
    - Every build is archived in Azure Blob Storage with appropriate versioning
-   - Production builds include semantic version numbers in filenames
+   - Production builds include semantic version numbers in filenames and are retained for 3 months
+   - Preview builds are retained for 9 days
    - GitHub Actions artifacts are also available for download
    - Latest builds for each environment are specially tagged
 
 2. **Environment Deployments**
 
-   - **Development**: Automatic deployment when code is merged to `develop`
    - **Preview**: Manual deployment for feature testing
-   - **Production**: Automatic deployment with semantic versioning when code is merged to `main`. Final PR for version bump which needs to be merged manually
+   - **Production**: Automatic deployment with semantic versioning when code is merged to `main`
 
 3. **Build Access**
    - Production builds: `https://<storage-account>.blob.core.windows.net/builds/production/taskhub-latest.zip`
-   - Development builds: `https://<storage-account>.blob.core.windows.net/builds/dev/taskhub-latest.zip`
    - Preview builds: `https://<storage-account>.blob.core.windows.net/builds/<preview-env>/taskhub-latest.zip`
    - Historical builds with timestamps are also preserved
 
@@ -67,9 +66,8 @@ volta install node@22.14.0 pnpm@10.6.3
 ## Links to Environments
 
 1. **[Development](https://green-grass-07a60cd00.6.azurestaticapps.net)**
-2. **[Preview Environment 1](https://wonderful-stone-059600500-preview1.eastasia.6.azurestaticapps.net)**
-3. **[Preview Environment 2](https://wonderful-stone-059600500-preview2.eastasia.6.azurestaticapps.net/)**
-4. **[Production](https://kind-water-0ea27f900.6.azurestaticapps.net)**
+2. **[Preview Environment 1](https://polite-cliff-035266300-preview1.eastasia.6.azurestaticapps.net)**
+3. **[Preview Environment 2](https://polite-cliff-035266300-preview2.eastasia.6.azurestaticapps.net)**
 
 ## License
 

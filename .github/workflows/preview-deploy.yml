@@ -102,6 +102,6 @@ jobs:
         if: success()
         run: |
           echo "🚀 Successfully deployed to ${{ github.event.inputs.environment }} environment"
-          echo "URL: https://wonderful-stone-059600500-${{ github.event.inputs.environment }}.eastasia.6.azurestaticapps.net"
+          echo "URL: https://polite-cliff-035266300-${{ github.event.inputs.environment }}.eastasia.6.azurestaticapps.net"
           echo "Build artifact: taskhub-${{ github.event.inputs.environment }}-${{ steps.create_artifact.outputs.timestamp }}.zip stored in Azure Blob Storage"
           echo "Download link: ${{ steps.upload_artifact.outputs.download_url }}"
