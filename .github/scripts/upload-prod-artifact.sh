@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e  # Exit on first error
-set -x  # Print each command before execution
 
 # Get inputs
 VERSION=$1

@@ -58,7 +58,10 @@ jobs:
 
       - name: Get new version
         id: get-version
-        run: echo "version=$(jq -r '.version' package.json)" >> $GITHUB_OUTPUT
+        run: |
+          version=$(jq -r '.version' package.json)
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "Extracted version: $version"
 
       - name: Create build artifact
         run: |
@@ -90,7 +93,7 @@ jobs:
       - name: Upload build to Azure Blob Storage
         id: upload_artifact
         run: |
-          set -x  # Print each command before execution
+          set -x # Print each command before execution
           ./.github/scripts/upload-prod-artifact.sh \
             ${{ steps.get-version.outputs.version }} \
             ${{ secrets.AZURE_STORAGE_ACCOUNT_NAME }} \
