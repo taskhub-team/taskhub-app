@@ -1,6 +1,6 @@
 # TaskHub-app
 
-[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier) [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
+[![Production Release](https://github.com/taskhub-team/taskhub-app/actions/workflows/production-release.yml/badge.svg)](https://github.com/taskhub-team/taskhub-app/actions/workflows/production-release.yml) [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier) [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org) ![Semantic Versioning](https://img.shields.io/badge/semver-2.0.0-brightgreen) ![pnpm](https://img.shields.io/badge/pnpm-10.6.3-orange) ![Node.js Version](https://img.shields.io/badge/node-v22.14.0-green) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/taskhub-team/taskhub-app)
 
 TaskHub-app is a minimalist task management application built with modern web technologies. This project serves as a showcase for React, TypeScript, and CI/CD pipeline implementation.
 

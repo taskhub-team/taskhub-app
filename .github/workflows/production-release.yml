@@ -56,6 +56,12 @@ jobs:
           VITE_ENVIRONMENT: "production"
           VITE_LOGGING_LEVEL: "error"
 
+      - name: Semantic Release
+        id: semantic
+        env:
+          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+        run: pnpm release
+
       - name: Get new version
         id: get-version
         run: |
@@ -93,7 +99,6 @@ jobs:
       - name: Upload build to Azure Blob Storage
         id: upload_artifact
         run: |
-          set -x # Print each command before execution
           ./.github/scripts/upload-prod-artifact.sh \
             ${{ steps.get-version.outputs.version }} \
             ${{ secrets.AZURE_STORAGE_ACCOUNT_NAME }} \
