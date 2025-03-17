@@ -6,9 +6,9 @@ on:
       - main
 
 permissions:
-  contents: write # This gives permission to update repository content
-  issues: write # For creating/updating issues
-  pull-requests: write # For creating/updating PRs
+  contents: write
+  issues: write
+  pull-requests: write
 
 jobs:
   release:
@@ -52,18 +52,49 @@ jobs:
         run: pnpm build
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL }}
-          VITE_ENVIRONMENT: 'production'
-          VITE_LOGGING_LEVEL: 'error'
+          VITE_ENVIRONMENT: "production"
+          VITE_LOGGING_LEVEL: "error"
 
-      - name: Semantic Release
-        id: semantic
-        env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
-        run: pnpm release
+      - name: Get build timestamp
+        id: timestamp
+        run: echo "timestamp=$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
 
-      - name: Get new version
-        id: get-version
-        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+      - name: Create build artifact
+        run: |
+          TIMESTAMP=${{ steps.timestamp.outputs.timestamp }}
+          cd dist
+          zip -r ../taskhub-prod-$TIMESTAMP.zip .
+          cd ..
+          echo "Build timestamp: $(date)" > build-info.txt
+          echo "Environment: production" >> build-info.txt
+          echo "Commit: ${{ github.sha }}" >> build-info.txt
+          echo "Branch: main" >> build-info.txt
+
+      - name: Upload build artifact to GitHub
+        uses: actions/upload-artifact@v4
+        with:
+          name: taskhub-prod
+          path: |
+            taskhub-prod-*.zip
+            build-info.txt
+          retention-days: 90
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Make script executable
+        run: chmod +x .github/scripts/upload-prod-artifact.sh
+
+      - name: Upload build to Azure Blob Storage
+        id: upload_artifact
+        run: |
+          ./.github/scripts/upload-prod-artifact.sh \
+            production \
+            ${{ steps.timestamp.outputs.timestamp }} \
+            ${{ secrets.AZURE_STORAGE_ACCOUNT_NAME }} \
+            ${{ github.sha }}
 
       - name: Deploy to Azure Static Web Apps
         id: deploy
@@ -71,13 +102,15 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_PROD }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          action: 'upload'
-          app_location: 'dist'
-          api_location: ''
+          action: "upload"
+          app_location: "dist"
+          api_location: ""
           skip_app_build: true
 
       - name: Post deployment notification
         if: success()
         run: |
-          echo "🚀 Successfully deployed version ${{ steps.get-version.outputs.version }} to production"
+          echo "🚀 Successfully deployed to production"
           echo "URL: https://witty-mushroom-0ba06a800.6.azurestaticapps.net"
+          echo "Build artifact: taskhub-prod-${{ steps.timestamp.outputs.timestamp }}.zip stored in Azure Blob Storage"
+          echo "Download link: ${{ steps.upload_artifact.outputs.download_url }}"
