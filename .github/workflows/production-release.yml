@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -63,7 +64,7 @@ jobs:
         run: |
           TIMESTAMP=${{ steps.timestamp.outputs.timestamp }}
           cd dist
-          zip -r ../taskhub-prod-$TIMESTAMP.zip .
+          zip -r ../taskhub-production-$TIMESTAMP.zip .
           cd ..
           echo "Build timestamp: $(date)" > build-info.txt
           echo "Environment: production" >> build-info.txt
@@ -73,9 +74,9 @@ jobs:
       - name: Upload build artifact to GitHub
         uses: actions/upload-artifact@v4
         with:
-          name: taskhub-prod
+          name: taskhub-production
           path: |
-            taskhub-prod-*.zip
+            taskhub-production-*.zip
             build-info.txt
           retention-days: 90
 
@@ -112,5 +113,5 @@ jobs:
         run: |
           echo "🚀 Successfully deployed to production"
           echo "URL: https://witty-mushroom-0ba06a800.6.azurestaticapps.net"
-          echo "Build artifact: taskhub-prod-${{ steps.timestamp.outputs.timestamp }}.zip stored in Azure Blob Storage"
+          echo "Build artifact: taskhub-production-${{ steps.timestamp.outputs.timestamp }}.zip stored in Azure Blob Storage"
           echo "Download link: ${{ steps.upload_artifact.outputs.download_url }}"
