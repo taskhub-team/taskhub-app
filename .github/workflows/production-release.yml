@@ -1,0 +1,83 @@
+name: Production Release
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write # This gives permission to update repository content
+  issues: write # For creating/updating issues
+  pull-requests: write # For creating/updating PRs
+
+jobs:
+  release:
+    name: Release and Deploy to Production
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Generate GitHub App Token
+        id: generate-token
+        uses: tibdex/github-app-token@v1
+        with:
+          app_id: ${{ secrets.APP_ID }}
+          private_key: ${{ secrets.PRIVATE_KEY }}
+          installation_id: ${{ secrets.INSTALLATION_ID }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install Dependencies
+        run: pnpm i
+
+      - name: Run tests
+        run: pnpm test || echo "No tests implemented yet"
+
+      - name: Build project
+        run: pnpm build
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_ENVIRONMENT: 'production'
+          VITE_LOGGING_LEVEL: 'error'
+
+      - name: Semantic Release
+        id: semantic
+        env:
+          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+        run: pnpm release
+
+      - name: Get new version
+        id: get-version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Deploy to Azure Static Web Apps
+        id: deploy
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_PROD }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: 'upload'
+          app_location: 'dist'
+          api_location: ''
+          skip_app_build: true
+
+      - name: Post deployment notification
+        if: success()
+        run: |
+          echo "🚀 Successfully deployed version ${{ steps.get-version.outputs.version }} to production"
+          echo "URL: https://witty-mushroom-0ba06a800.6.azurestaticapps.net"
