@@ -65,7 +65,7 @@ volta install node@22.14.0 pnpm@10.6.3
 
 ## Links to Environments
 
-1. **[Development](https://green-grass-07a60cd00.6.azurestaticapps.net)**
+1. **[Production](https://witty-mushroom-0ba06a800.6.azurestaticapps.net)**
 2. **[Preview Environment 1](https://polite-cliff-035266300-preview1.eastasia.6.azurestaticapps.net)**
 3. **[Preview Environment 2](https://polite-cliff-035266300-preview2.eastasia.6.azurestaticapps.net)**
 
