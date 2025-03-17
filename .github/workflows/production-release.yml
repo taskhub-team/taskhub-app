@@ -91,6 +91,7 @@ jobs:
       - name: Upload build to Azure Blob Storage
         id: upload_artifact
         run: |
+          set -x  # Print each command before execution
           ./.github/scripts/upload-prod-artifact.sh \
             production \
             ${{ steps.timestamp.outputs.timestamp }} \
