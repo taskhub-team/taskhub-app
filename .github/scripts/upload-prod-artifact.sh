@@ -3,9 +3,9 @@ set -e  # Exit on first error
 set -x  # Print each command before execution
 
 # Get inputs
-VERSION=$2
-STORAGE_ACCOUNT=$3
-COMMIT_SHA=$4
+VERSION=$1
+STORAGE_ACCOUNT=$2
+COMMIT_SHA=$3
 
 echo "Uploading production build artifact to Azure Storage..."
 

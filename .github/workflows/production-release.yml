@@ -56,27 +56,26 @@ jobs:
           VITE_ENVIRONMENT: "production"
           VITE_LOGGING_LEVEL: "error"
 
-      - name: Get build timestamp
-        id: timestamp
-        run: echo "timestamp=$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
+      - name: Get new version
+        id: get-version
+        run: echo "version=$(jq -r '.version' package.json)" >> $GITHUB_OUTPUT
 
       - name: Create build artifact
         run: |
-          TIMESTAMP=${{ steps.timestamp.outputs.timestamp }}
           cd dist
-          zip -r ../taskhub-production-$TIMESTAMP.zip .
+          zip -r ../taskhub-production-v${{ steps.get-version.outputs.version }}.zip .
           cd ..
           echo "Build timestamp: $(date)" > build-info.txt
-          echo "Environment: production" >> build-info.txt
+          echo "Version: ${{ steps.get-version.outputs.version }}" >> build-info.txt
           echo "Commit: ${{ github.sha }}" >> build-info.txt
           echo "Branch: main" >> build-info.txt
 
       - name: Upload build artifact to GitHub
         uses: actions/upload-artifact@v4
         with:
-          name: taskhub-production
+          name: taskhub-production-v${{ steps.get-version.outputs.version }}
           path: |
-            taskhub-production-*.zip
+            taskhub-production-v${{ steps.get-version.outputs.version }}.zip
             build-info.txt
           retention-days: 90
 
@@ -93,8 +92,7 @@ jobs:
         run: |
           set -x  # Print each command before execution
           ./.github/scripts/upload-prod-artifact.sh \
-            production \
-            ${{ steps.timestamp.outputs.timestamp }} \
+            ${{ steps.get-version.outputs.version }} \
             ${{ secrets.AZURE_STORAGE_ACCOUNT_NAME }} \
             ${{ github.sha }}
 
