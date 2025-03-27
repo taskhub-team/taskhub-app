@@ -75,6 +75,7 @@ jobs:
           version=$(jq -r '.version' package.json)
           echo "version=$version" >> $GITHUB_OUTPUT
           echo "Extracted version: $version"
+        if: steps.semantic.outputs.new_release_published == 'true'
 
       - name: Create build artifact
         run: |
@@ -85,6 +86,7 @@ jobs:
           echo "Version: ${{ steps.get-version.outputs.version }}" >> build-info.txt
           echo "Commit: ${{ github.sha }}" >> build-info.txt
           echo "Branch: main" >> build-info.txt
+        if: steps.semantic.outputs.new_release_published == 'true'
 
       - name: Upload build artifact to GitHub
         uses: actions/upload-artifact@v4
@@ -94,14 +96,17 @@ jobs:
             taskhub-production-v${{ steps.get-version.outputs.version }}.zip
             build-info.txt
           retention-days: 90
+        if: steps.semantic.outputs.new_release_published == 'true'
 
       - name: Login to Azure
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+        if: steps.semantic.outputs.new_release_published == 'true'
 
       - name: Make script executable
         run: chmod +x .github/scripts/upload-prod-artifact.sh
+        if: steps.semantic.outputs.new_release_published == 'true'
 
       - name: Upload build to Azure Blob Storage
         id: upload_artifact
@@ -110,6 +115,7 @@ jobs:
             ${{ steps.get-version.outputs.version }} \
             ${{ secrets.AZURE_STORAGE_ACCOUNT_NAME }} \
             ${{ github.sha }}
+        if: steps.semantic.outputs.new_release_published == 'true'
 
       - name: Deploy to Azure Static Web Apps
         id: deploy
@@ -121,9 +127,10 @@ jobs:
           app_location: "dist"
           api_location: ""
           skip_app_build: true
+        if: steps.semantic.outputs.new_release_published == 'true'
 
       - name: Post deployment notification
-        if: success()
+        if: steps.semantic.outputs.new_release_published == 'true' && success()
         run: |
           echo "🚀 Successfully deployed to production"
           echo "URL: https://witty-mushroom-0ba06a800.6.azurestaticapps.net"

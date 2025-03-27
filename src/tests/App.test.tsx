@@ -17,7 +17,7 @@ describe('App Component', () => {
     render(<App />);
 
     expect(
-      screen.getByRole('heading', { name: /Vite \+ React/i }),
+      screen.getByRole('heading', { name: /Vite \+ React App/i }),
     ).toBeInTheDocument();
   });
 
